@@ -40,28 +40,64 @@ namespace TryAzureCosmos.Utils
         }
 
 
-        public async Task<List<T>> Query<T>(string containerName, string queryStr, Dictionary<string, object> parameters)
+        public async Task<List<T>> Query<T>(string containerName, string queryStr, Dictionary<string, object>? parameters = null, string? partitionKeyValue = null)
         {
             var container = _database.GetContainer(containerName);
             var query = new QueryDefinition(queryStr);
-            foreach (var parameter in parameters)
+            if (parameters is not null)
             {
-                query.WithParameter(parameter.Key, parameter.Value);
-            }
-
-            using var feed = container.GetItemQueryIterator<T>(query);
-
-            var items = new List<T>();
-            while (feed.HasMoreResults)
-            {
-                var response = await feed.ReadNextAsync();
-                foreach (T item in response)
+                foreach (var parameter in parameters)
                 {
-                    items.Add(item);
+                    query.WithParameter(parameter.Key, parameter.Value);
                 }
             }
 
+            var options = new QueryRequestOptions();
+            if (!string.IsNullOrEmpty(partitionKeyValue))
+            {
+                options.PartitionKey = new PartitionKey(partitionKeyValue);
+            }
+
+            using var iterator = container.GetItemQueryIterator<T>(queryDefinition: query, requestOptions: options);
+
+            var items = new List<T>();
+            while (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync();
+                items.AddRange(response.Resource);
+            }
+
             return items;
+        }
+
+        public async Task<T?> QueryFirst<T>(string containerName, string queryStr, Dictionary<string, object>? parameters = null, string? partitionKeyValue = null)
+        {
+            var container = _database.GetContainer(containerName);
+            var query = new QueryDefinition(queryStr);
+
+            if (parameters is not null)
+            {
+                foreach (var parameter in parameters)
+                {
+                    query.WithParameter(parameter.Key, parameter.Value);
+                }
+            }
+
+            var options = new QueryRequestOptions();
+            if (!string.IsNullOrEmpty(partitionKeyValue))
+            {
+                options.PartitionKey = new PartitionKey(partitionKeyValue);
+            }
+
+            using var iterator = container.GetItemQueryIterator<T>(queryDefinition: query, requestOptions: options);
+
+            if (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync();
+                return response.FirstOrDefault();
+            }
+
+            return default;
         }
     }
 }
