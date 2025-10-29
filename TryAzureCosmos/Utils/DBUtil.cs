@@ -99,5 +99,36 @@ namespace TryAzureCosmos.Utils
 
             return default;
         }
+
+        public async Task<bool> Exist<T>(string containerName, string queryStr, Dictionary<string, object>? parameters = null, string? partitionKeyValue = null)
+        {
+            var container = _database.GetContainer(containerName);
+            var query = new QueryDefinition(queryStr);
+
+            if (parameters is not null)
+            {
+                foreach (var parameter in parameters)
+                {
+                    query.WithParameter(parameter.Key, parameter.Value);
+                }
+            }
+
+            var options = new QueryRequestOptions();
+            if (!string.IsNullOrEmpty(partitionKeyValue))
+            {
+                options.PartitionKey = new PartitionKey(partitionKeyValue);
+            }
+
+            using var iterator = container.GetItemQueryIterator<T>(queryDefinition: query, requestOptions: options);
+            while (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync();
+                if (response.Any())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
