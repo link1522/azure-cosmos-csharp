@@ -13,10 +13,16 @@ namespace TryAzureCosmos.Utils
             _database = _cosmosClient.GetDatabase(databaseName);
         }
 
-        public async Task UpsertItem<T>(string containerName, T item, PartitionKey partitionKey)
+        public async Task CreateItem<T>(string containerName, T item, PartitionKey partitionKey)
         {
             var container = _database.GetContainer(containerName);
             await container.CreateItemAsync(item, partitionKey);
+        }
+
+        public async Task UpsertItem<T>(string containerName, T item, PartitionKey partitionKey)
+        {
+            var container = _database.GetContainer(containerName);
+            await container.UpsertItemAsync(item, partitionKey);
         }
 
         public async Task<T> ReadItem<T>(string containerName, string id, PartitionKey partitionKey)
