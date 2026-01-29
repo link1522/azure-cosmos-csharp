@@ -45,6 +45,16 @@ namespace TryAzureCosmos.Utils
             await container.DeleteItemAsync<T>(id, partitionKey);
         }
 
+        public async Task PatchItem<T>(string containerName, string id, PartitionKey partitionKey, Dictionary<string, object> properties)
+        {
+            var container = _database.GetContainer(containerName);
+            List<PatchOperation> patchOperation = [];
+            foreach (var property in properties)
+            {
+                patchOperation.Add(PatchOperation.Replace($"/{property.Key}", property.Value));
+            }
+            await container.PatchItemAsync<T>(id, partitionKey, patchOperation);
+        }
 
         public async Task<List<T>> Query<T>(string containerName, string queryStr, Dictionary<string, object>? parameters = null, string? partitionKeyValue = null)
         {
