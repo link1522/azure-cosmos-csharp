@@ -28,6 +28,8 @@ var item = new Product(
 
 // await dbUtil.UpsertItem(containerName, item, new PartitionKey(item.categoryId));
 
+// await dbUtil.ReplaceItem(containerName, item, item.id, new PartitionKey(item.categoryId));
+
 //var product = await dbUtil.ReadItem<Product>(containerName, item.id, new PartitionKey(item.categoryId));
 //Console.WriteLine(product);
 

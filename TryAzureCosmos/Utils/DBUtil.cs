@@ -25,6 +25,12 @@ namespace TryAzureCosmos.Utils
             await container.UpsertItemAsync(item, partitionKey);
         }
 
+        public async Task ReplaceItem<T>(string containerName, T item, string id, PartitionKey partitionKey)
+        {
+            var container = _database.GetContainer(containerName);
+            await container.ReplaceItemAsync(item, id, partitionKey);
+        }
+
         public async Task<T> ReadItem<T>(string containerName, string id, PartitionKey partitionKey)
         {
             try
