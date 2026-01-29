@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Configuration;
 using TryAzureCosmos.Entities;
 using TryAzureCosmos.Utils;
 
@@ -25,19 +26,23 @@ var item = new Product(
     tags: ["tag1", "tag2"]
 );
 
-//await dbUtil.UpsertItem(containerName, item, new PartitionKey(item.categoryId));
+// await dbUtil.UpsertItem(containerName, item, new PartitionKey(item.categoryId));
 
 //var product = await dbUtil.ReadItem<Product>(containerName, item.id, new PartitionKey(item.categoryId));
 //Console.WriteLine(product);
 
 //await dbUtil.DeleteItem<Product>(containerName, item.id, new PartitionKey(item.categoryId));
 
-var parameters = new Dictionary<string, object>
-{
-    {"@categoryId", "26C74104-40BC-4541-8EF5-9892F7F03D72"},
-};
-var products = await dbUtil.Query<Product>(containerName, "SELECT * FROM products p WHERE p.categoryId = @categoryId", parameters);
+// var parameters = new Dictionary<string, object>
+// {
+//     {"@categoryId", "0078cde9-3989-4ee0-ab0c-eaa0c047900b"},
+// };
+// var products = await dbUtil.Query<Product>(containerName, "SELECT * FROM products p WHERE p.categoryId = @categoryId", parameters);
 
+// await dbUtil.PatchItem<Product>(containerName, item.id, new PartitionKey(item.categoryId), new Dictionary<string, object>
+// {
+//     {"price", 1000.00m}
+// });
 
 Console.WriteLine("Done!");
 
